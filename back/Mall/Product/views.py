@@ -1,11 +1,15 @@
 from django.shortcuts import render, HttpResponse
-
+from .models import Product
 # Create your views here.
 
 
-def index(request):
-    return HttpResponse('Welcome!')
+def create(request):
+    product = Product(
+        product_name="제품1",
+        price=10000
 
+    )
+    print(product)
+    product.save()
 
-def read(request):
-    return HttpResponse('Read!')
+    return HttpResponse("제품 생성")

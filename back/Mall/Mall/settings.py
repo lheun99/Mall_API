@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'Mall.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'Mall',
         'USER': 'postgres',
         'PASSWORD': '0157',
         'HOST': '127.0.0.1',
