@@ -16,7 +16,7 @@ class OrderListSerializer(serializers.ModelSerializer):
     orderer_info = serializers.SerializerMethodField()
     product_info = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
-    phone_number = PhoneNumberField(region="SK")
+    recipient_phone_number = PhoneNumberField(region="SK")
 
     class Meta:
         model = Order

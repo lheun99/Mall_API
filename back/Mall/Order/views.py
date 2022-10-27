@@ -1,8 +1,11 @@
+from urllib import request
 from django.shortcuts import render
 from rest_framework import viewsets, mixins
+from django_filters.rest_framework import DateFromToRangeFilter, DjangoFilterBackend, FilterSet
+from rest_framework.decorators import action
 from .serializers import OrderSerializer, OrderListSerializer
 from .models import Order
-from django_filters.rest_framework import DateFromToRangeFilter, DjangoFilterBackend, FilterSet
+
 # Create your views here.
 
 
@@ -28,3 +31,16 @@ class OrderListViewSet(mixins.ListModelMixin,
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = OrderFilter
+
+
+class OrderDataViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = OrderListSerializer
+
+    def get_queryset(self):
+        date = self.request.query_params.get('date')
+
+        if date:
+            queryset = Order.objects.filter(ordered_at__startswith=date)
+        return queryset
