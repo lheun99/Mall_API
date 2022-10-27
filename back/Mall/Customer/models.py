@@ -11,7 +11,7 @@ class Customer(models.Model):
     customer_name = models.CharField(
         verbose_name="고객 이름", max_length=50)
     phone_number = PhoneNumberField(
-        verbose_name="전화번호", unique=True)
+        verbose_name="전화번호", unique=True, region="SK")
 
     def __str__(self):
         return str(self.customer_name)

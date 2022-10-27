@@ -1,27 +1,30 @@
-from itertools import product
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render
+from rest_framework import viewsets, mixins
+from .serializers import OrderSerializer, OrderListSerializer
 from .models import Order
-from Customer.models import Customer
-from Product.models import Product
+from django_filters.rest_framework import DateFromToRangeFilter, DjangoFilterBackend, FilterSet
 # Create your views here.
 
 
-def create(request):
-    order = Order(
-        address="아파트",
+class OrderFilter(FilterSet):
+    ordered_at = DateFromToRangeFilter()
 
-        orderer=Customer.objects.get(id=1),
-        product=Product.objects.get(id=1),
-        quantity=1,
-
-        recipient_name="수령자",
-        recipient_phone_number='01012345678',
-    )
-    print(order)
-    order.save()
-
-    return HttpResponse("주문완료")
+    class Meta:
+        model = Order
+        fields = ['orderer_id', 'status', 'ordered_at']
 
 
-def list(request):
-    return HttpResponse(Order.objects.all())
+class OrderViewSet(mixins.CreateModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+
+class OrderListViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       viewsets.GenericViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderListSerializer
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = OrderFilter
