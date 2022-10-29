@@ -3,9 +3,11 @@ from .models import Order
 from Customer.serializers import CustomerInfoSerializer
 from Product.serializers import ProductInfoSerializer
 from phonenumber_field.serializerfields import PhoneNumberField
-
-
+from django.db.models import Sum
+from django.db.models import F
 # 주문서 정보
+
+
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
@@ -44,3 +46,13 @@ class OrderListSerializer(serializers.ModelSerializer):
     def get_status(self, instance):
         status = instance.get_status_display()
         return status
+
+
+class OrderDataSerializer(serializers.ModelSerializer):
+    total__sum = serializers.IntegerField()
+
+    class Meta:
+        model = Order
+        fields = [
+            "total__sum"
+        ]

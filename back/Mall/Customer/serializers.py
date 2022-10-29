@@ -1,5 +1,5 @@
-from .models import Customer
 from rest_framework import serializers
+from .models import Customer
 from phonenumber_field.serializerfields import PhoneNumberField
 
 

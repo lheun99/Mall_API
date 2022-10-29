@@ -8,8 +8,8 @@ class Product(models.Model):
     description = models.TextField(verbose_name="제품 설명", null=True)
     price = models.IntegerField(verbose_name='제품 가격')
 
-    def __str__(self):
-        return str(self.product_name)
+    # def __str__(self):
+    #     return str(self.price)
 
     class Meta:
         db_table = "Product"

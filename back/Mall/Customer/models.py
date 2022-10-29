@@ -13,9 +13,6 @@ class Customer(models.Model):
     phone_number = PhoneNumberField(
         verbose_name="전화번호", unique=True, region="SK")
 
-    def __str__(self):
-        return str(self.customer_name)
-
     class Meta:
         db_table = "Customer"
         verbose_name = "고객"

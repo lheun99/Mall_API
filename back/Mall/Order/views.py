@@ -3,9 +3,11 @@ from django.shortcuts import render
 from rest_framework import viewsets, mixins
 from django_filters.rest_framework import DateFromToRangeFilter, DjangoFilterBackend, FilterSet
 from rest_framework.decorators import action
-from .serializers import OrderSerializer, OrderListSerializer
+from .serializers import OrderDataSerializer, OrderSerializer, OrderListSerializer
 from .models import Order
-
+from rest_framework.response import Response
+from django.db.models import Sum
+from django.db.models import F
 # Create your views here.
 
 
@@ -36,11 +38,11 @@ class OrderListViewSet(mixins.ListModelMixin,
 class OrderDataViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
-    serializer_class = OrderListSerializer
+    serializer_class = OrderDataSerializer
 
-    def get_queryset(self):
+    def list(self, request, *args, **kwargs):
         date = self.request.query_params.get('date')
-
-        if date:
-            queryset = Order.objects.filter(ordered_at__startswith=date)
-        return queryset
+        queryset = Order.objects.filter(ordered_at__startswith=date).select_related().values(
+            'quantity', 'product_id__price').annotate(total=F('quantity')*F('product_id__price')).aggregate(Sum('total'))
+        serializer = self.get_serializer_class()
+        return Response(serializer(queryset).data)
