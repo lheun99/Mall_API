@@ -1,14 +1,14 @@
-from urllib import request
 from django.shortcuts import render
-from rest_framework import viewsets, mixins
 from django_filters.rest_framework import DateFromToRangeFilter, DjangoFilterBackend, FilterSet
+from django.db.models import Sum, Count, F
+from django.db.models.functions import TruncDate
+
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from .serializers import OrderDataSerializer, OrderSerializer, OrderListSerializer
 from .models import Order
-from rest_framework.response import Response
-from django.db.models import Sum
-from django.db.models import F
-# Create your views here.
 
 
 class OrderFilter(FilterSet):
@@ -19,15 +19,12 @@ class OrderFilter(FilterSet):
         fields = ['orderer_id', 'status', 'ordered_at']
 
 
-class OrderViewSet(mixins.CreateModelMixin,
-                   viewsets.GenericViewSet):
+class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
 
-class OrderListViewSet(mixins.ListModelMixin,
-                       mixins.RetrieveModelMixin,
-                       viewsets.GenericViewSet):
+class OrderListViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderListSerializer
 
@@ -40,9 +37,23 @@ class OrderDataViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = OrderDataSerializer
 
-    def list(self, request, *args, **kwargs):
-        date = self.request.query_params.get('date')
-        queryset = Order.objects.filter(ordered_at__startswith=date).select_related().values(
-            'quantity', 'product_id__price').annotate(total=F('quantity')*F('product_id__price')).aggregate(Sum('total'))
+    @action(detail=False)
+    def total_sales(self, request, *args, **kwargs):
+        queryset = Order.objects.select_related().annotate(
+            date=TruncDate('ordered_at')).values('date').annotate(total=Sum(F('quantity')*F('product_id__price'))).order_by('date')
+        serializer = self.get_serializer_class()
+        return Response(serializer(queryset).data)
+
+    @action(detail=False)
+    def sales_quantity(self, request, *args, **kwargs):
+        queryset = Order.objects.select_related().annotate(
+            date=TruncDate('ordered_at')).values('date').annotate(quantity=Count('quantity'), product=F('product_id__product_name')).values('date', 'product', 'quantity').order_by('date')
+        serializer = self.get_serializer_class()
+        return Response(serializer(queryset).data)
+
+    @ action(detail=False)
+    def sales_price(self, request, *args, **kwargs):
+        queryset = Order.objects.select_related().annotate(
+            date=TruncDate('ordered_at')).values('date').annotate(price=Sum('product_id__price'), product=F('product_id__product_name')).values('date', 'product', 'price').order_by('date')
         serializer = self.get_serializer_class()
         return Response(serializer(queryset).data)

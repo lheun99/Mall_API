@@ -1,11 +1,8 @@
 from rest_framework import serializers
-from .models import Order
 from Customer.serializers import CustomerInfoSerializer
 from Product.serializers import ProductInfoSerializer
 from phonenumber_field.serializerfields import PhoneNumberField
-from django.db.models import Sum
-from django.db.models import F
-# 주문서 정보
+from .models import Order
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -49,10 +46,14 @@ class OrderListSerializer(serializers.ModelSerializer):
 
 
 class OrderDataSerializer(serializers.ModelSerializer):
-    total__sum = serializers.IntegerField()
+    data = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
-            "total__sum"
+            "data"
         ]
+
+    def get_data(self, instance):
+
+        return instance
