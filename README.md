@@ -1,7 +1,5 @@
 # Mall-API
 
-### 해피문데이 백엔드 과제
-
 ```bash
 python manage.py makemigrations
 python manage.py migrate
